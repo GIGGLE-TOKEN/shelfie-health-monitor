@@ -212,24 +212,100 @@
                 }
             },
 
+            async checkBackend() {
+                try {
+                    const startTime = Date.now();
+                    const response = await fetch(`${CONFIG.apiBaseUrl}/api/health`, {
+                        method: 'GET',
+                        timeout: CONFIG.timeout
+                    });
+                    const latency = Date.now() - startTime;
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        return { 
+                            status: 'connected', 
+                            message: `Backend: ${data.message}`, 
+                            latency: latency 
+                        };
+                    } else {
+                        return { 
+                            status: 'error', 
+                            message: `Backend Error: ${response.status}`, 
+                            latency: null 
+                        };
+                    }
+                } catch (error) {
+                    return { 
+                        status: 'error', 
+                        message: `Backend Error: ${error.message}`, 
+                        latency: null 
+                    };
+                }
+            },
+
             async checkSendGrid() {
-                // This would require a backend endpoint to test SendGrid
-                // For now, we'll simulate a check
-                return {
-                    status: 'connected',
-                    message: 'SendGrid configured (requires backend test)',
-                    latency: null
-                };
+                try {
+                    const startTime = Date.now();
+                    const response = await fetch(`${CONFIG.apiBaseUrl}/auth/forgot-password`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: 'test@shelfieplatform.com' }),
+                        timeout: CONFIG.timeout
+                    });
+                    const latency = Date.now() - startTime;
+                    
+                    if (response.ok) {
+                        return { 
+                            status: 'connected', 
+                            message: 'SendGrid email service working', 
+                            latency: latency 
+                        };
+                    } else {
+                        return { 
+                            status: 'warning', 
+                            message: `SendGrid: ${response.status}`, 
+                            latency: null 
+                        };
+                    }
+                } catch (error) {
+                    return { 
+                        status: 'error', 
+                        message: `SendGrid Error: ${error.message}`, 
+                        latency: null 
+                    };
+                }
             },
 
             async checkMongoDB() {
-                // This would require a backend endpoint to test MongoDB
-                // For now, we'll simulate a check
-                return {
-                    status: 'connected',
-                    message: 'MongoDB Atlas connected (requires backend test)',
-                    latency: null
-                };
+                try {
+                    const startTime = Date.now();
+                    const response = await fetch(`${CONFIG.apiBaseUrl}/api/health`, {
+                        method: 'GET',
+                        timeout: CONFIG.timeout
+                    });
+                    const latency = Date.now() - startTime;
+                    
+                    if (response.ok) {
+                        return { 
+                            status: 'connected', 
+                            message: 'MongoDB Atlas connected via backend', 
+                            latency: latency 
+                        };
+                    } else {
+                        return { 
+                            status: 'error', 
+                            message: `MongoDB Error: ${response.status}`, 
+                            latency: null 
+                        };
+                    }
+                } catch (error) {
+                    return { 
+                        status: 'error', 
+                        message: `MongoDB Error: ${error.message}`, 
+                        latency: null 
+                    };
+                }
             }
         };
 
@@ -246,6 +322,7 @@
             
             // Check all services
             results.services.api = await healthChecks.checkAPI();
+            results.services.backend = await healthChecks.checkBackend();
             results.services.cloudflare = await healthChecks.checkCloudFlare();
             results.services.website = await healthChecks.checkWebsite();
             results.services.sendgrid = await healthChecks.checkSendGrid();
