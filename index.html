@@ -343,6 +343,65 @@
                         latency: null 
                     };
                 }
+            },
+
+            async checkEmailAlerting() {
+                try {
+                    const startTime = Date.now();
+                    const response = await fetch(`${CONFIG.apiBaseUrl}/api/analytics/email/metrics`, {
+                        method: 'GET',
+                        timeout: CONFIG.timeout
+                    });
+                    const latency = Date.now() - startTime;
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const summary = data.data?.summary;
+                        
+                        if (summary) {
+                            // Check for alert conditions
+                            const bounceRate = summary.bounceRate || 0;
+                            const openRate = summary.openRate || 0;
+                            
+                            let status = 'connected';
+                            let message = 'Email alerting system working';
+                            
+                            if (bounceRate > 5) {
+                                status = 'warning';
+                                message = `High bounce rate: ${bounceRate.toFixed(2)}%`;
+                            } else if (openRate < 10) {
+                                status = 'warning';
+                                message = `Low open rate: ${openRate.toFixed(2)}%`;
+                            } else {
+                                message += ` (Bounce: ${bounceRate.toFixed(2)}%, Open: ${openRate.toFixed(2)}%)`;
+                            }
+                            
+                            return { 
+                                status, 
+                                message, 
+                                latency: latency 
+                            };
+                        } else {
+                            return { 
+                                status: 'connected', 
+                                message: 'Email alerting system ready', 
+                                latency: latency 
+                            };
+                        }
+                    } else {
+                        return { 
+                            status: 'warning', 
+                            message: `Email Alerting: ${response.status}`, 
+                            latency: null 
+                        };
+                    }
+                } catch (error) {
+                    return { 
+                        status: 'error', 
+                        message: `Email Alerting Error: ${error.message}`, 
+                        latency: null 
+                    };
+                }
             }
         };
 
@@ -365,6 +424,7 @@
             results.services.sendgrid = await healthChecks.checkSendGrid();
             results.services.mongodb = await healthChecks.checkMongoDB();
             results.services.emailAnalytics = await healthChecks.checkEmailAnalytics();
+            results.services.emailAlerting = await healthChecks.checkEmailAlerting();
             
             // Determine overall status
             const serviceStatuses = Object.values(results.services);
