@@ -306,6 +306,43 @@
                         latency: null 
                     };
                 }
+            },
+
+            async checkEmailAnalytics() {
+                try {
+                    const startTime = Date.now();
+                    const response = await fetch(`${CONFIG.apiBaseUrl}/api/analytics/email`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            event: 'health_check',
+                            email: 'health@monitor.com',
+                            data: { source: 'health_monitor' }
+                        }),
+                        timeout: CONFIG.timeout
+                    });
+                    const latency = Date.now() - startTime;
+                    
+                    if (response.ok) {
+                        return { 
+                            status: 'connected', 
+                            message: 'Email analytics tracking working', 
+                            latency: latency 
+                        };
+                    } else {
+                        return { 
+                            status: 'warning', 
+                            message: `Email Analytics: ${response.status}`, 
+                            latency: null 
+                        };
+                    }
+                } catch (error) {
+                    return { 
+                        status: 'error', 
+                        message: `Email Analytics Error: ${error.message}`, 
+                        latency: null 
+                    };
+                }
             }
         };
 
@@ -327,6 +364,7 @@
             results.services.website = await healthChecks.checkWebsite();
             results.services.sendgrid = await healthChecks.checkSendGrid();
             results.services.mongodb = await healthChecks.checkMongoDB();
+            results.services.emailAnalytics = await healthChecks.checkEmailAnalytics();
             
             // Determine overall status
             const serviceStatuses = Object.values(results.services);
