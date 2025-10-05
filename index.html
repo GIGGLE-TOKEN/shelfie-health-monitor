@@ -244,34 +244,33 @@
                 }
             },
 
-            async checkSendGrid() {
+            async checkAWSSES() {
                 try {
                     const startTime = Date.now();
-                    const response = await fetch(`${CONFIG.apiBaseUrl}/auth/forgot-password`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: 'test@shelfieplatform.com' }),
+                    const response = await fetch(`${CONFIG.apiBaseUrl}/api/analytics/email/metrics`, {
+                        method: 'GET',
                         timeout: CONFIG.timeout
                     });
                     const latency = Date.now() - startTime;
                     
                     if (response.ok) {
+                        const data = await response.json();
                         return { 
                             status: 'connected', 
-                            message: 'SendGrid email service working', 
+                            message: 'AWS SES email service configured', 
                             latency: latency 
                         };
                     } else {
                         return { 
                             status: 'warning', 
-                            message: `SendGrid: ${response.status}`, 
+                            message: `AWS SES: ${response.status}`, 
                             latency: null 
                         };
                     }
                 } catch (error) {
                     return { 
                         status: 'error', 
-                        message: `SendGrid Error: ${error.message}`, 
+                        message: `AWS SES Error: ${error.message}`, 
                         latency: null 
                     };
                 }
@@ -421,7 +420,7 @@
             results.services.backend = await healthChecks.checkBackend();
             results.services.cloudflare = await healthChecks.checkCloudFlare();
             results.services.website = await healthChecks.checkWebsite();
-            results.services.sendgrid = await healthChecks.checkSendGrid();
+            results.services.awsSES = await healthChecks.checkAWSSES();
             results.services.mongodb = await healthChecks.checkMongoDB();
             results.services.emailAnalytics = await healthChecks.checkEmailAnalytics();
             results.services.emailAlerting = await healthChecks.checkEmailAlerting();
