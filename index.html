@@ -122,16 +122,17 @@
             async checkAPI() {
                 try {
                     const startTime = Date.now();
-                    const response = await fetch(`${CONFIG.apiBaseUrl}${CONFIG.healthEndpoint}`, {
+                    const response = await fetch(`${CONFIG.apiBaseUrl}/health`, {
                         method: 'GET',
                         timeout: CONFIG.timeout
                     });
                     const latency = Date.now() - startTime;
                     
                     if (response.ok) {
+                        const data = await response.json();
                         return { 
                             status: 'connected', 
-                            message: 'API server responding', 
+                            message: `API server responding (${data.service})`, 
                             latency: latency 
                         };
                     } else {
@@ -215,7 +216,7 @@
             async checkBackend() {
                 try {
                     const startTime = Date.now();
-                    const response = await fetch(`${CONFIG.apiBaseUrl}/api/health`, {
+                    const response = await fetch(`${CONFIG.apiBaseUrl}/health`, {
                         method: 'GET',
                         timeout: CONFIG.timeout
                     });
@@ -225,7 +226,7 @@
                         const data = await response.json();
                         return { 
                             status: 'connected', 
-                            message: `Backend: ${data.message}`, 
+                            message: `Backend: ${data.service} system running`, 
                             latency: latency 
                         };
                     } else {
