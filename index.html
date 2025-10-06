@@ -122,7 +122,7 @@
             async checkAPI() {
                 try {
                     const startTime = Date.now();
-                    const response = await fetch(`${CONFIG.apiBaseUrl}/health`, {
+                    const response = await fetch(`${CONFIG.apiBaseUrl}/api/health`, {
                         method: 'GET',
                         timeout: CONFIG.timeout
                     });
@@ -216,7 +216,7 @@
             async checkBackend() {
                 try {
                     const startTime = Date.now();
-                    const response = await fetch(`${CONFIG.apiBaseUrl}/health`, {
+                    const response = await fetch(`${CONFIG.apiBaseUrl}/api/health`, {
                         method: 'GET',
                         timeout: CONFIG.timeout
                     });
